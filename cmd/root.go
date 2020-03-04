@@ -71,7 +71,18 @@ func byShards(el []serversets.Entity) []string {
 	return shards
 }
 
-type mcRouterPool struct {
+// '{"pools":{"A":{"servers":["cache:11211"]}},"route":"PoolRoute|A"}' -p 5000
+
+type Configuration struct {
+	Pools Pools  `json:"pools"`
+	Route string `json:"route"`
+}
+
+type Pools struct {
+	Pool Pool `json:"A"`
+}
+
+type Pool struct {
 	Servers []string `json:"servers"`
 }
 
@@ -86,10 +97,15 @@ func writeConfig(watch *serversets.Watch) error {
 
 	var jsonData []byte
 	_servers := byShards(watch.EndpointEntities())
-	mcRouterConfig := &mcRouterPool{
-		Servers: _servers,
+	mcConfig := Configuration{
+		Pools{
+			Pool{
+				Servers: _servers,
+			},
+		},
+		"PoolRoute|A",
 	}
-	jsonData, err := json.MarshalIndent(&mcRouterConfig, "", "    ")
+	jsonData, err := json.MarshalIndent(&mcConfig, "", "    ")
 
 	if err != nil {
 		log.Println(err)

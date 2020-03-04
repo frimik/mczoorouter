@@ -20,13 +20,10 @@ build:
 	DOCKER_BUILDKIT=1 \
 		docker build -t $(NAME) -f Dockerfile .
 
-release: build
-	git checkout releases
-	docker create --name $(NAME)-build-results $(NAME):$(VERSION)
-	docker cp $(NAME)-build-results:/usr/bin/aurora dist/aurora.pex
+mcrouter: build
+	docker create --name $(NAME)-build-results $(NAME)
+	docker cp $(NAME)-build-results:/usr/bin/mcrouter mcrouter
 	docker rm -f $(NAME)-build-results
-	./release.sh
-
 
 tag: build
 	DOCKER_BUILDKIT=1 \
